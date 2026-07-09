@@ -1,101 +1,108 @@
-# Tienda de vehiculos
+# 🚗 Tienda de Vehículos - Proyecto Cloud
 
-Aplicación de ejemplo en 3 capas usando Docker y Docker Compose:
+Aplicación web para la gestión de vehículos (CRUD) desarrollada bajo una arquitectura de tres capas y desplegada en AWS utilizando Docker y Docker Compose.
 
-- Frontend: HTML + JavaScript (Nginx)
-- Backend: Node.js + Express
-- Base de datos: MySQL
+---
 
-## Estructura del proyecto
+## 🏗️ Arquitectura
 
-tienda-vehiculos-EC2
-├── docker-compose.yml
-├── tienda-vehiculos-frontend
-│   ├── Dockerfile
-│   ├── index.html
-│   └── app.js
-│   └── nginx.conf
-├── tienda-vehiculos-backend
-│   ├── Dockerfile
-│   ├── package.json
-│   └── server.js
-└── tienda-vehiculos-db
-    └── init.sql
+El proyecto está compuesto por los siguientes servicios:
 
-## Requisitos
-1. Docker instalado en EC2:
-```bash
-sudo yum install docker -y
-```
-2. Docker habilitado y en ejecución en EC2:
-```bash
-sudo systemctl enable docker
-sudo systemctl start docker
-```
-3. Cliente Mysql instalar en EC2
-```bash
-sudo yum install -y mariadb105
-```
-4. instalar y habilitar Docker Compose
-```bash
-sudo mkdir -p /usr/local/lib/docker/cli-plugins
-sudo curl -SL https://github.com/docker/compose/releases/download/v2.29.2/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+```text
+             [ Usuario / Navegador ]
+                      │
+                      ▼
+            [ Frontend - Nginx ]
+                      │
+                      ▼
+          [ Backend - Node.js / Express ]
+                      │
+                      ▼
+               [ Amazon RDS - MySQL ]
 ```
 
-## Validar conectividad con RDS desde EC2 (SG-DB inbound 3306 origen SG-WEB)
-1. Insalar telnet en EC2
-```bash
-sudo yum install telnet -y
-```
-2. Validar comunicación con RDS
-```bash
-sudo telnet TU_ENDPOINT_RDS 3306
+---
+
+## 📂 Estructura del Proyecto
+
+```text
+.
+├── docker-compose.yml          # Orquestación de los servicios
+├── tienda-vehiculos-frontend/  # Frontend (HTML, CSS, JavaScript, Nginx)
+├── tienda-vehiculos-backend/   # API REST desarrollada en Node.js y Express
+└── tienda-vehiculos-db/        # Scripts SQL para inicializar la base de datos
 ```
 
-## Crear base de datos en RDS desde EC2
-1. En EC2 en ruta /home/ec2-user/ crear archivo y copiar contenido init.sql y luego ejecutar
-2. Ejecutar comando para crear base de datos y tablas con datos: 
-```bash
-sudo mysql -h TU_ENDPOINT_RDS -u admin -p < init.sql
-```
-3. Comprobar base de datos creada en RDS: 
-```bash
-sudo mysql -h TU_ENDPOINT_RDS -u admin -p -e "SHOW DATABASES;" ## Te pedira la contraseña y es la que generaste cuando creaste tu RDS.
-```
-4. Comprobar datos en base de datos creada en RDS: 
-```bash
-sudo mysql -h TU_ENDPOINT_RDS -u admin -p -e "USE tienda_vehiculos; SHOW TABLES; SELECT * FROM vehiculos;"
+---
+
+## 🚀 Despliegue
+
+### 1. Requisitos Previos
+
+Antes de ejecutar la aplicación, asegúrate de contar con lo siguiente:
+
+- Instancia Amazon EC2 (Amazon Linux 2023).
+- Docker instalado.
+- Docker Compose instalado.
+- Base de datos MySQL en Amazon RDS.
+- Grupo de seguridad configurado para permitir las conexiones necesarias.
+
+---
+
+### 2. Configuración Inicial
+
+#### Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto con la siguiente configuración:
+
+```env
+DB_HOST=tu-endpoint-rds.amazonaws.com
+DB_USER=alumno
+DB_PASSWORD=alumno123
+DB_NAME=tienda_vehiculos
+DB_PORT=3306
 ```
 
-## Ejecutar aplicación en Docker
+#### Inicializar la Base de Datos
 
-1. En EC2 en ruta /home/ec2-user/ crear archivo y copiar contenido .env y docker-compose-yml
-2. Editar archivo .env y cambiar a TU_ENDPOINT_RDS, cambiar a tu DB_USER, cambiar a tu DB_PASSWORD (Estos datos son cuando creaste tu RDS (usuario y contraseña) + endpoint RDS)
-3. Editar archivo docker-compose.yml y cambiar el ID de tu cuenta AWS en el endpoint de tu ECR para FRONTEND Y BACKEND.
-2. Ejecutar:
-```bash
-docker compose build
-docker compose up -d
-docker ps
-docker compose logs backend
-docker compose logs frontend
-```
-3. Abrir en el navegador:
-- Frontend: http://IP_PUBLICA:80
-- Backend (API): http://IP_PUBLICA:3001/api/vehiculos
+Importa el script SQL en tu instancia de Amazon RDS:
 
-4. Para detener los contenedores:
 ```bash
-docker compose down -v
+mysql -h <TU_ENDPOINT_RDS> -u admin -p < tienda-vehiculos-db/init.sql
 ```
 
-5. Eliminar contenedores (opcional):
+---
+
+### 3. Ejecución
+
+Desde la carpeta raíz del proyecto ejecuta:
+
 ```bash
-docker rm tienda-vehiculos-backend
-docker rm tienda-vehiculos-frontend
+# Construir las imágenes
+sudo docker compose build
+
+# Levantar los contenedores
+sudo docker compose up -d
 ```
 
-## Notas
-- La base de datos esta en RDS y al levantar los contenedores el backend apunta al endpoint del RDS.
-- Puedes modificar el frontend y backend, reconstruir y volver a levantar los contenedores.
+Para verificar que todos los contenedores estén ejecutándose:
+
+```bash
+sudo docker ps
+```
+
+---
+
+## 🛠️ Solución de Problemas (Troubleshooting)
+
+| Problema | Causa probable | Solución |
+|----------|----------------|----------|
+| **ERR_CONNECTION_REFUSED** | Los puertos requeridos no están habilitados en el Security Group de la instancia EC2. | Verifica que el **Security Group** permita tráfico TCP en los puertos **80** (Frontend) y **3001** (Backend). |
+| **La tabla no carga información** | El frontend está apuntando a una dirección IP incorrecta del backend. | Comprueba que el archivo **app.js** del frontend utilice la **IP pública correcta** de la instancia EC2. |
+| **Error de conexión con la base de datos** | Endpoint de Amazon RDS o credenciales incorrectas. | Revisa el archivo **.env**, verifica el endpoint de RDS y comprueba la conectividad ejecutando: `telnet <RDS_ENDPOINT> 3306`. |
+
+---
+
+## 📜 Licencia
+
+Proyecto desarrollado con fines académicos para el laboratorio de la asignatura **Ingeniería en Infraestructura Tecnológica**.
