@@ -3,7 +3,7 @@
  */
 
 // URL base de la API
-const API_BASE_URL = "http://44.214.182.28:3001/api";
+const API_BASE_URL = "http://44.222.76.61:3001/api";
 
 const VEHICULOS_URL = `${API_BASE_URL}/vehiculos`;
 
