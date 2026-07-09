@@ -1,0 +1,20 @@
+services:
+  frontend:
+    image: TU_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/tienda-vehiculos-frontend:latest
+    container_name: tienda-vehiculos-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    image: TU_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/tienda-vehiculos-backend:latest
+    container_name: tienda-vehiculos-backend
+    environment:
+      DB_HOST: "${DB_HOST}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_NAME: "${DB_NAME}"
+      DB_PORT: "3306"
+    ports:
+      - "3001:3001"
