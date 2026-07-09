@@ -3,15 +3,7 @@
  */
 
 // URL base de la API
-const API_BASE_URL = (() => {
-  const host = window.location.hostname;
-  // Local
-  if (host === "localhost" || host === "127.0.0.1") {
-    return "http://localhost:3001/api";
-  }
-  // EC2 u otro host: mismo hostname con puerto 3001
-  return `http://${host}:3001/api`;
-})();
+const API_BASE_URL = "http://44.214.182.28:3001/api";
 
 const VEHICULOS_URL = `${API_BASE_URL}/vehiculos`;
 
