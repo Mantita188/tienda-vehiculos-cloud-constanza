@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: TU_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/tienda-vehiculos-frontend:latest
+    image: 975049999378.dkr.ecr.us-east-1.amazonaws.com/automoviltech-frontend:latest
     container_name: tienda-vehiculos-frontend
     ports:
       - "80:80"
@@ -8,7 +8,7 @@ services:
       - backend
 
   backend:
-    image: TU_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/tienda-vehiculos-backend:latest
+    image: 975049999378.dkr.ecr.us-east-1.amazonaws.com/automoviltech-backend:latest
     container_name: tienda-vehiculos-backend
     environment:
       DB_HOST: "${DB_HOST}"
